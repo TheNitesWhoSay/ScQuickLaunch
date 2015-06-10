@@ -1,0 +1,15 @@
+6/10 09:30:49.468  Connecting to Battle.net...
+6/10 09:30:49.488  Trying to load ws2_32.dll
+6/10 09:30:49.488      querying gateway
+6/10 09:30:49.528      searching for the fastest server
+6/10 09:30:49.548      connected to server
+6/10 09:30:49.578  Connected to server 199.108.55.58
+6/10 09:30:49.578      Validating ID
+6/10 09:30:49.898  File: 'lockdown-IX86-00.mpq' in bncache.dat is corrupt (3) - deleting from cache
+6/10 09:30:49.898      requesting latest version
+6/10 09:30:50.428  user version and cdkey passed as ok
+6/10 09:30:50.428  Get latest battle.net icons
+6/10 09:30:50.428  Returning ping data to server
+6/10 09:30:50.428      Get player profile
+6/10 09:30:51.520  Connected to Battle.net
+6/10 09:30:54.730  Disconnecting from server
