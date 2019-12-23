@@ -1,6 +1,8 @@
 #ifndef MEMSEARCH_H
 #define MEMSEARCH_H
 #include <Windows.h>
+#include <memory>
+#include <list>
 #include "ProcessModder.h"
 #include "Region.h"
 
@@ -36,7 +38,7 @@ class MemSearch
 	private:
 		bool includeReadOnly;
 		ProcessModder* process; // The process currently being searched
-		Region* firstRegion; // Forward list of regions remaining in the search
+        std::list<std::shared_ptr<Region>> regions; // All regions remaining in the search
 };
 
 #endif

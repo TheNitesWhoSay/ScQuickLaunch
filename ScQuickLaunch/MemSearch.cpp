@@ -4,7 +4,7 @@
 #include <iomanip> // For stream manipulation
 using namespace std;
 
-MemSearch::MemSearch() : process(NULL), firstRegion(NULL), includeReadOnly(false)
+MemSearch::MemSearch() : process(NULL), includeReadOnly(false)
 {
 
 }
@@ -25,26 +25,21 @@ bool MemSearch::NewScan(ProcessModder* newProcess, bool scanIncludeReadOnly)
 		UINT position = 0;
 		MEMORY_BASIC_INFORMATION regionInfo = { };
 		HANDLE hProcess = process->getHandle();
-		Region* curr, *last = firstRegion;
+		std::shared_ptr<Region> curr = nullptr;
 
 		while ( !(VirtualQueryEx(hProcess, (LPCVOID)position, &regionInfo, sizeof(regionInfo)) == 0 && GetLastError() == ERROR_INVALID_PARAMETER) )
 		{
 			if ( canWrite(regionInfo) || ( includeReadOnly && canRead(regionInfo) ) )
 			{
-				curr = new Region(last);
-				if ( firstRegion == NULL )
-					firstRegion = curr;
-				last = curr;
+				curr = std::shared_ptr<Region>(new Region());
 				if ( !(	   curr->init((LPCVOID)position, regionInfo.RegionSize)
 						&& curr->readIn(process)								   ) )
 				{
 					cout << "Couldn't init or readin" << endl;
-					if ( firstRegion == curr )
-						firstRegion = firstRegion->next;
-					delete curr;
 				}
 				else
 				{
+                    regions.push_back(curr);
 					//cout << uppercase << hex << firstRegion->getBase() << ',' << uppercase << hex << firstRegion->getSize() << endl;
 					//cin.get();
 				}
@@ -58,8 +53,7 @@ bool MemSearch::NewScan(ProcessModder* newProcess, bool scanIncludeReadOnly)
 
 		}
 
-		if ( firstRegion != NULL )
-			return true;
+        return regions.size() > 0;
 	}
 	return false;
 }
@@ -71,28 +65,26 @@ void MemSearch::EndScan()
 
 void MemSearch::PrintRegions()
 {
-	if ( firstRegion == NULL )
+	if ( regions.empty() )
 		cout << "No Regions" << endl;
 
 	int totalSize = 0;
 	int count = 0;
 
-	Region* curr = firstRegion;
-	while ( curr != NULL )
-	{
+    for ( auto & region : regions )
+    {
 		//cout << "Base: 0x" << uppercase << hex << curr->getBase() << " Size: " << uppercase << hex << curr->getSize() << endl;
-		int* intData = (int*)(curr->data);
-		for ( int i=0; i<curr->getSize()/4; i++ )
-		{
-			if ( intData[i] == 1674 )
-			{
-				cout << "0x" << setw(8) << setfill('0') << uppercase << hex << UINT(curr->getBase())+i*4 << endl;
+        int* intData = (int*)(region->getData());
+        for ( int i=0; i<region->getSize()/4; i++ )
+        {
+            if ( intData[i] == 1674 )
+            {
+				cout << "0x" << setw(8) << setfill('0') << uppercase << hex << UINT(region->getBase())+i*4 << endl;
 				count++;
-			}
-		}
-		totalSize += curr->getSize();
-		curr = curr->next;
-	}
+            }
+		    totalSize += region->getSize();
+        }
+    }
 	cout << "Total Size: " << dec << totalSize << endl;
 	cout << "Count: " << count << endl;
 }
@@ -148,13 +140,12 @@ bool MemSearch::canWrite(MEMORY_BASIC_INFORMATION &region)
 
 void MemSearch::printAll(int value)
 {
-	Region* curr = firstRegion;
-	while ( curr != nullptr )
-	{
-		byte* regionDat = (byte*)curr->data;
+    for ( auto & region : regions )
+    {
+		byte* regionDat = (byte*)region->getData();
 		// Look through all data in the region
 		for ( UINT pos = 0;
-			  pos + sizeof(int) < curr->getSize();
+			  pos + sizeof(int) < region->getSize();
 			  pos ++
 			)
 		{
@@ -162,21 +153,14 @@ void MemSearch::printAll(int value)
 			//{
 			if ( (*((int*)&regionDat[pos])) == value )
 			{
-				cout << "0x" << setw(8) << setfill('0') << uppercase << hex << pos+UINT(curr->getBase()) << endl;
+				cout << "0x" << setw(8) << setfill('0') << uppercase << hex << pos+UINT(region->getBase()) << endl;
 			}
 			//}
 		}
-
-		curr = curr->next;
-	}
+    }
 }
 
 void MemSearch::FlushRegions()
 {
-	while ( firstRegion != NULL )
-	{
-		Region* next = firstRegion->next;
-		delete firstRegion;
-		firstRegion = next;
-	}
+    regions.clear();
 }
