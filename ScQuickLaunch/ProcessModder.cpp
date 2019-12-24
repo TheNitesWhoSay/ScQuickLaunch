@@ -96,6 +96,16 @@ bool ProcessModder::readMem(LPCVOID baseAddress, UINT numBytes, void* dest)
 	return ReadProcessMemory(hookedProcess, baseAddress, dest, numBytes, NULL) == TRUE;
 }
 
+std::vector<void*> findMemory(const void* memory, size_t memorySize)
+{
+    throw std::exception();
+}
+
+void* findNext(size_t searchStart, const void* memory, size_t memorySize)
+{
+    throw std::exception();
+}
+
 bool ProcessModder::GetArrayAddress(LPVOID &address, UINT* arrayItems, UINT arrayLength)
 {
 	return false;

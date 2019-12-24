@@ -1,6 +1,7 @@
 #ifndef PROCESSMODDER_H
 #define PROCESSMODDER_H
 #include <Windows.h>
+#include <vector>
 
 #define MAX_MODULES 1000
 
@@ -27,7 +28,7 @@ class ProcessModder
 		bool openWithWindowName(const char* szWindowName);
 		bool openWithProcessHandle(HANDLE hProcess);
 
-		// Returns true if a process has been hooked and remains open
+		// Returns true if a process has been hooked and remaigins open
 		bool isOpen();
 
 		// Cleans up process handles
@@ -45,6 +46,10 @@ class ProcessModder
 			'dest' must be able to hold at least 'numBytes' bytes
 			returns true if successful */
 		bool readMem(LPCVOID baseAddress, UINT numBytes, void* dest);
+        
+        std::vector<void*> findMemory(const void* memory, size_t memorySize);
+
+        void* findNext(size_t searchStart, const void* memory, size_t memorySize);
 
 		/** Gets the address of an array containing the given items
 			returns true if successful */
@@ -63,6 +68,8 @@ class ProcessModder
 
 		// Print all system memory and the access this program has to it
 		void printAccessibleMemRegions(bool includeReadOnly);
+
+        std::vector<void*> getAccesibleMemResiongs(bool includeReadOnly);
 
 		// Prints information from the provided memory region structure
 		void PrintMemRegionInfo(MEMORY_BASIC_INFORMATION &region);

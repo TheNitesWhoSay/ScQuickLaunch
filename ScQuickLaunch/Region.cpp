@@ -1,9 +1,8 @@
 #include "Region.h"
 
-Region::Region(Region* parent) : base(NULL), size(0), data(NULL), next(NULL)
+Region::Region() : base(NULL), size(0), data(NULL)
 {
-	if ( parent != NULL )
-		parent->next = this;
+
 }
 
 Region::~Region()
